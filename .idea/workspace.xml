@@ -2,9 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="dc3b68e3-d5db-43ed-b661-a0ef9b270d92" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/misc.xml" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pom.xml" afterPath="$PROJECT_DIR$/pom.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tp_2014_02_java_susekov.iml" afterPath="$PROJECT_DIR$/tp_2014_02_java_susekov.iml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="tp_2014_02_java_susekov.iws" />
@@ -741,20 +738,24 @@
       <workItem from="1392445041741" duration="242000" />
       <workItem from="1392445290030" duration="41000" />
       <workItem from="1392445332561" duration="232000" />
-      <workItem from="1392445567158" duration="962000" />
+      <workItem from="1392445567158" duration="992000" />
     </task>
     <task id="LOCAL-00001" summary="First version of Hello Server">
       <created>1392319793428</created>
       <updated>1392319793428</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Better version of Hello Server&#10;">
+      <created>1392446558052</created>
+      <updated>1392446558052</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="8485000" />
+    <option name="totallyTimeSpent" value="8515000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1616" height="876" extended-state="6" />
+    <frame x="-8" y="-8" width="1616" height="876" extended-state="7" />
     <editor active="false" />
     <layout>
       <window_info id="Palette&#9;" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
@@ -798,7 +799,8 @@
       <TodoPanelSettings />
     </option>
     <MESSAGE value="First version of Hello Server" />
-    <option name="LAST_COMMIT_MESSAGE" value="First version of Hello Server" />
+    <MESSAGE value="Better version of Hello Server&#10;" />
+    <option name="LAST_COMMIT_MESSAGE" value="Better version of Hello Server&#10;" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager />
