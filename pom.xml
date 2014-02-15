@@ -30,21 +30,12 @@
             <artifactId>jetty-webapp</artifactId>
             <version>${jettyVersion}</version>
         </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-rewrite</artifactId>
+            <version>9.1.0.M0</version>
+        </dependency>
     </dependencies>
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>1.1</version>
-                <executions>
-                    <execution><goals><goal>java</goal></goals></execution>
-                </executions>
-                <configuration>
-                    <mainClass>org.example.HelloServer</mainClass>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+
 </project>
 
