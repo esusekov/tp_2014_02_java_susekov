@@ -1,13 +1,14 @@
-package stat;
+package redirect;
 
-import frontend.FrontendFroSession;
+import frontend.Frontend;
+import org.eclipse.jetty.rewrite.handler.RedirectRegexRule;
+import org.eclipse.jetty.rewrite.handler.RewriteHandler;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import frontend.Frontend;
 
 import javax.servlet.Servlet;
 
@@ -24,11 +25,20 @@ public class Main {
         context.addServlet(new ServletHolder(frontend), "/*");
 
         ResourceHandler resource_handler = new ResourceHandler();
-        resource_handler.setDirectoriesListed(true);
+        resource_handler.setDirectoriesListed(false);
         resource_handler.setResourceBase("static");
 
+        RewriteHandler rewriteHandler = new RewriteHandler();
+        rewriteHandler.setRewriteRequestURI(true);
+        rewriteHandler.setRewritePathInfo(true);
+        rewriteHandler.setOriginalPathAttribute("requestedPath");
+        RedirectRegexRule rule = new RedirectRegexRule();
+        rule.setRegex("/");
+        rule.setReplacement("/index.html");
+        rewriteHandler.addRule(rule);
+
         HandlerList handlers = new HandlerList();
-        handlers.setHandlers(new Handler[]{resource_handler, context});
+        handlers.setHandlers(new Handler[]{rewriteHandler, resource_handler, context});
         server.setHandler(handlers);
 
         server.start();
