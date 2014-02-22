@@ -15,15 +15,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
-/**
- * Created by Egor on 15.02.14.
- */
+
 public class Frontend extends HttpServlet{
     private String login = "";
     private String password = "";
     private AtomicLong userIdGenerator = new AtomicLong();
-    final String myLogin = "esusekov";
-    final String myPassword = "abcde";
+    private Map<String, String> users = new HashMap<>();
+    public Frontend() {
+        users.put("esusekov", "abcde");
+        users.put("ClarkKent", "Superman");
+    }
+
     public static String getTime() {
         Date date = new Date();
         date.getTime();
@@ -32,9 +34,7 @@ public class Frontend extends HttpServlet{
     }
 
     private boolean checkUserExistance(String userLogin, String userPassword) {
-        System.out.println(userLogin);
-        System.out.println(userPassword);
-        return ((userLogin.equals(myLogin)) && (userPassword.equals(myPassword)));
+        return ((users.containsKey(userLogin)) && (users.get(userLogin).equals(userPassword)));
     }
 
     public void doGet(HttpServletRequest request,
@@ -47,13 +47,17 @@ public class Frontend extends HttpServlet{
         if (request.getPathInfo().equals("/timer")) {
             HttpSession session = request.getSession();
             Long userId = (Long) session.getAttribute("userId");
+            if (userId == null) {
+                response.sendRedirect("/");
+                return;
+            }
             pageVariables.put("refreshPeriod", "1000");
             pageVariables.put("serverTime", getTime());
             pageVariables.put("userId", userId);
             response.getWriter().println(PageGenerator.getPage("userid.tml", pageVariables));
             return;
         }
-        response.getWriter().println(PageGenerator.getPage("authform.tml", pageVariables));
+        response.sendRedirect("/");
     }
 
     public void doPost(HttpServletRequest request,
