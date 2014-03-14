@@ -14,27 +14,18 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
+import accountService.AccountService;
+import logic.UsersDataSet;
 
 
 public class Frontend extends HttpServlet{
     private String login = "";
     private String password = "";
     private AtomicLong userIdGenerator = new AtomicLong();
-    private Map<String, String> users = new HashMap<>();
-    public Frontend() {
-        users.put("esusekov", "abcde");
-        users.put("ClarkKent", "Superman");
-    }
 
     public static String getTime() {
-        Date date = new Date();
-        date.getTime();
         DateFormat formatter = new SimpleDateFormat("HH.mm.ss");
-        return formatter.format(date);
-    }
-
-    private boolean checkUserExistance(String userLogin, String userPassword) {
-        return ((users.containsKey(userLogin)) && (users.get(userLogin).equals(userPassword)));
+        return formatter.format(new Date());
     }
 
     public void doGet(HttpServletRequest request,
@@ -57,6 +48,10 @@ public class Frontend extends HttpServlet{
             response.getWriter().println(PageGenerator.getPage("userid.tml", pageVariables));
             return;
         }
+        if (request.getPathInfo().equals("/register")) {
+            response.getWriter().println(PageGenerator.getPage("register.tml", null));
+            return;
+        }
         response.sendRedirect("/");
     }
 
@@ -64,18 +59,35 @@ public class Frontend extends HttpServlet{
                        HttpServletResponse response) throws ServletException, IOException {
         login = request.getParameter("login");
         password = request.getParameter("password");
-        if (!(login == null) && !(password == null) && checkUserExistance(login, password)) {
-            HttpSession session = request.getSession();
-            Long userId = (Long) session.getAttribute("userId");
-            if (userId == null) {
-                userId = userIdGenerator.getAndIncrement();
-                session.setAttribute("userId", userId);
+        if (request.getPathInfo().equals("/register")) {
+            if (!(login == null) && !(password == null)) {
+                UsersDataSet user = new UsersDataSet();
+                user.setLogin(login);
+                user.setPassword(password);
+                if (AccountService.addUser(user)) {
+                    response.sendRedirect("/");
+                } else {
+                    response.sendRedirect("/register");
+                }
+            } else {
+                response.sendRedirect("/register");
             }
-            response.sendRedirect("/timer");
-        } else {
-            response.sendRedirect("/");
+            return;
         }
-
+        if (request.getPathInfo().equals("/")) {
+            UsersDataSet user = AccountService.getUserByLogin(login);
+            if (!(user == null) && (password.equals(user.getPassword()))) {
+                HttpSession session = request.getSession();
+                Long userId = (Long) session.getAttribute("userId");
+                if (userId == null) {
+                    userId = userIdGenerator.getAndIncrement();
+                    session.setAttribute("userId", userId);
+                }
+                response.sendRedirect("/timer");
+            } else {
+                response.sendRedirect("/");
+            }
+        }
 
     }
 }
