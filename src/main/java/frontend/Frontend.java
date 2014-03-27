@@ -19,8 +19,8 @@ import logic.UsersDataSet;
 
 
 public class Frontend extends HttpServlet{
-    private String login = "";
-    private String password = "";
+    private String login = null;
+    private String password = null;
     private AtomicLong userIdGenerator = new AtomicLong();
 
     public static String getTime() {
@@ -49,33 +49,49 @@ public class Frontend extends HttpServlet{
             return;
         }
         if (request.getPathInfo().equals("/register")) {
-            response.getWriter().println(PageGenerator.getPage("register.tml", null));
+            pageVariables.put("msg", "");
+            response.getWriter().println(PageGenerator.getPage("register.tml", pageVariables));
             return;
         }
-        response.sendRedirect("/");
+        if (request.getPathInfo().equals("/auth")) {
+            pageVariables.put("msg", "");
+            response.getWriter().println(PageGenerator.getPage("auth.tml", pageVariables));
+            return;
+        }
     }
 
     public void doPost(HttpServletRequest request,
                        HttpServletResponse response) throws ServletException, IOException {
         login = request.getParameter("login");
         password = request.getParameter("password");
+        response.setContentType("text/html;charset=utf-8");
+        response.setStatus(HttpServletResponse.SC_OK);
+        Map<String, Object> pageVariables = new HashMap<>();
         if (request.getPathInfo().equals("/register")) {
-            if (!(login == null) && !(password == null)) {
+            if (!(login.isEmpty()) && !(password.isEmpty())) {
                 UsersDataSet user = new UsersDataSet();
                 user.setLogin(login);
                 user.setPassword(password);
                 if (AccountService.addUser(user)) {
-                    response.sendRedirect("/");
+                    pageVariables.put("msg", "You're successfully registered!");
+                    response.getWriter().println(PageGenerator.getPage("register.tml", pageVariables));
                 } else {
-                    response.sendRedirect("/register");
+                    pageVariables.put("msg", "Error! This login is occupied.");
+                    response.getWriter().println(PageGenerator.getPage("register.tml", pageVariables));
                 }
             } else {
-                response.sendRedirect("/register");
+                pageVariables.put("msg", "Error! Please, fill in all fields.");
+                response.getWriter().println(PageGenerator.getPage("register.tml", pageVariables));
             }
             return;
         }
-        if (request.getPathInfo().equals("/")) {
+        if (request.getPathInfo().equals("/auth")) {
             UsersDataSet user = AccountService.getUserByLogin(login);
+            if (login.isEmpty() || password.isEmpty()) {
+                pageVariables.put("msg", "Error! Please, fill in all fields.");
+                response.getWriter().println(PageGenerator.getPage("auth.tml", pageVariables));
+                return;
+            }
             if (!(user == null) && (password.equals(user.getPassword()))) {
                 HttpSession session = request.getSession();
                 Long userId = (Long) session.getAttribute("userId");
@@ -84,8 +100,12 @@ public class Frontend extends HttpServlet{
                     session.setAttribute("userId", userId);
                 }
                 response.sendRedirect("/timer");
+            } else if (!(user == null) && !(password.equals(user.getPassword()))) {
+                pageVariables.put("msg", "Error! Wrong password.");
+                response.getWriter().println(PageGenerator.getPage("auth.tml", pageVariables));
             } else {
-                response.sendRedirect("/");
+                pageVariables.put("msg", "You're not registered!");
+                response.getWriter().println(PageGenerator.getPage("auth.tml", pageVariables));
             }
         }
 

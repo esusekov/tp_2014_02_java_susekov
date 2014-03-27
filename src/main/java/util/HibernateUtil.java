@@ -11,7 +11,6 @@ public class HibernateUtil {
 
     static {
         try {
-            //creates the session factory from hibernate.cfg.xml
             Configuration configuration = new Configuration().addResource("hibernate.cfg.xml");
             configuration.configure();
             serviceRegistry = new StandardServiceRegistryBuilder().applySettings(

@@ -1,20 +1,19 @@
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html xmlns="http://www.w3.org/1999/xhtml"  >
 <head>
-    <title>Registration</title>
+    <title>Authorization</title>
 </head>
 <body>
-    <h1>Registration</h1>
-    <#if msg == "You're successfully registered!">
+    <h1>Authorization</h1>
+    <#if msg == "You're not registered!">
         <p>${msg}</p>
-        <p><a href="auth">Login</a></p>
+        <p><a href="register">Register</a></p>
     <#else>
         <form method="POST">
             <p>Username: <input type="text" name="login"/></p>
             <p>Password: <input type="text" name="password" /></p>
-            <input type="submit" value="REGISTER" />
+            <input type="submit" value="LOGIN" />
         </form>
         <p>${msg}</p>
     </#if>
 
 </body>
-</html>
