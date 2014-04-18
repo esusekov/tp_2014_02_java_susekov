@@ -11,27 +11,29 @@ public class UsersDataSet {
     @GeneratedValue(generator="increment")
     @GenericGenerator(name="increment", strategy = "increment")
     @Column(name="id")
-    private Long id;
+    private final Long id;
     @Column(name="login")
-    private String login;
+    private final String login;
     @Column(name="password")
-    private String password;
+    private final String password;
 
     public UsersDataSet() {
+        this.id = Long.valueOf(-1);
+        this.login = null;
+        this.password = null;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public void setLogin(String login) {
+    public UsersDataSet(String login, String password) {
+        this.id = Long.valueOf(-1);
         this.login = login;
-    }
-
-    public void setPassword(String password) {
         this.password = password;
     }
 
+    public UsersDataSet(Long id, String login, String password) {
+        this.id = id;
+        this.login = login;
+        this.password = password;
+    }
 
     public Long getId() {
         return id;

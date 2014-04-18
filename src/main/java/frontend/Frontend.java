@@ -19,10 +19,15 @@ import logic.UsersDataSet;
 
 
 public class Frontend extends HttpServlet{
-    private String login = null;
-    private String password = null;
     private AtomicLong userIdGenerator = new AtomicLong();
+    // добавить карту sessionid на класс userdata со всеми данными пользователя
 
+    //временное решение: приватное поле с accountservice  задаваемое в конструкторе
+    //фронтенда. Будет заменено на message system
+    private AccountService accountService;
+    public Frontend(AccountService accountService) {
+        this.accountService = accountService;
+    }
     public static String getTime() {
         DateFormat formatter = new SimpleDateFormat("HH.mm.ss");
         return formatter.format(new Date());
@@ -30,84 +35,88 @@ public class Frontend extends HttpServlet{
 
     public void doGet(HttpServletRequest request,
                       HttpServletResponse response) throws ServletException, IOException {
-        login = request.getParameter("login");
-        password = request.getParameter("password");
         response.setContentType("text/html;charset=utf-8");
         response.setStatus(HttpServletResponse.SC_OK);
         Map<String, Object> pageVariables = new HashMap<>();
-        if (request.getPathInfo().equals("/timer")) {
-            HttpSession session = request.getSession();
-            Long userId = (Long) session.getAttribute("userId");
-            if (userId == null) {
+        String path = request.getPathInfo();
+        switch (path) {
+            case "/timer":
+                HttpSession session = request.getSession();
+                Long userId = (Long) session.getAttribute("userId");
+                if (userId == null) {
+                    response.sendRedirect("/");
+                    break;
+                }
+                pageVariables.put("refreshPeriod", "1000");
+                pageVariables.put("serverTime", getTime());
+                pageVariables.put("userId", userId);
+                response.getWriter().println(PageGenerator.getPage("userid.tml", pageVariables));
+                break;
+            case "/register":
+                pageVariables.put("msg", "");
+                response.getWriter().println(PageGenerator.getPage("register.tml", pageVariables));
+                break;
+            case "/auth":
+                pageVariables.put("msg", "");
+                response.getWriter().println(PageGenerator.getPage("auth.tml", pageVariables));
+                break;
+            default:
                 response.sendRedirect("/");
-                return;
-            }
-            pageVariables.put("refreshPeriod", "1000");
-            pageVariables.put("serverTime", getTime());
-            pageVariables.put("userId", userId);
-            response.getWriter().println(PageGenerator.getPage("userid.tml", pageVariables));
-            return;
+                break;
         }
-        if (request.getPathInfo().equals("/register")) {
-            pageVariables.put("msg", "");
-            response.getWriter().println(PageGenerator.getPage("register.tml", pageVariables));
-            return;
-        }
-        if (request.getPathInfo().equals("/auth")) {
-            pageVariables.put("msg", "");
-            response.getWriter().println(PageGenerator.getPage("auth.tml", pageVariables));
-            return;
-        }
+
     }
 
     public void doPost(HttpServletRequest request,
                        HttpServletResponse response) throws ServletException, IOException {
-        login = request.getParameter("login");
-        password = request.getParameter("password");
+        String login = request.getParameter("login");
+        String password = request.getParameter("password");
         response.setContentType("text/html;charset=utf-8");
         response.setStatus(HttpServletResponse.SC_OK);
         Map<String, Object> pageVariables = new HashMap<>();
-        if (request.getPathInfo().equals("/register")) {
-            if (!(login.isEmpty()) && !(password.isEmpty())) {
-                UsersDataSet user = new UsersDataSet();
-                user.setLogin(login);
-                user.setPassword(password);
-                if (AccountService.addUser(user)) {
-                    pageVariables.put("msg", "You're successfully registered!");
-                    response.getWriter().println(PageGenerator.getPage("register.tml", pageVariables));
+        String path = request.getPathInfo();
+        switch (path) {
+            case "/register":
+                if (!(login.isEmpty()) && !(password.isEmpty())) {
+                    UsersDataSet user = new UsersDataSet(login, password);
+                    if (accountService.addUser(user)) {
+                        pageVariables.put("msg", "You're successfully registered!");
+                        response.getWriter().println(PageGenerator.getPage("register.tml", pageVariables));
+                    } else {
+                        pageVariables.put("msg", "Error! This login is occupied.");
+                        response.getWriter().println(PageGenerator.getPage("register.tml", pageVariables));
+                    }
                 } else {
-                    pageVariables.put("msg", "Error! This login is occupied.");
+                    pageVariables.put("msg", "Error! Please, fill in all fields.");
                     response.getWriter().println(PageGenerator.getPage("register.tml", pageVariables));
                 }
-            } else {
-                pageVariables.put("msg", "Error! Please, fill in all fields.");
-                response.getWriter().println(PageGenerator.getPage("register.tml", pageVariables));
-            }
-            return;
-        }
-        if (request.getPathInfo().equals("/auth")) {
-            UsersDataSet user = AccountService.getUserByLogin(login);
-            if (login.isEmpty() || password.isEmpty()) {
-                pageVariables.put("msg", "Error! Please, fill in all fields.");
-                response.getWriter().println(PageGenerator.getPage("auth.tml", pageVariables));
-                return;
-            }
-            if (!(user == null) && (password.equals(user.getPassword()))) {
-                HttpSession session = request.getSession();
-                Long userId = (Long) session.getAttribute("userId");
-                if (userId == null) {
-                    userId = userIdGenerator.getAndIncrement();
-                    session.setAttribute("userId", userId);
+                break;
+            case "/auth":
+                if (login.isEmpty() || password.isEmpty()) {
+                    pageVariables.put("msg", "Error! Please, fill in all fields.");
+                    response.getWriter().println(PageGenerator.getPage("auth.tml", pageVariables));
+                    break;
                 }
-                response.sendRedirect("/timer");
-            } else if (!(user == null) && !(password.equals(user.getPassword()))) {
-                pageVariables.put("msg", "Error! Wrong password.");
-                response.getWriter().println(PageGenerator.getPage("auth.tml", pageVariables));
-            } else {
-                pageVariables.put("msg", "You're not registered!");
-                response.getWriter().println(PageGenerator.getPage("auth.tml", pageVariables));
-            }
+                UsersDataSet user = accountService.getUserByLogin(login);
+                if (!(user == null) && (password.equals(user.getPassword()))) {
+                    HttpSession session = request.getSession();
+                    Long userId = (Long) session.getAttribute("userId");
+                    if (userId == null) {
+                        userId = userIdGenerator.getAndIncrement();
+                        session.setAttribute("userId", userId);
+                    }
+                    response.sendRedirect("/timer");
+                } else if (!(user == null) && !(password.equals(user.getPassword()))) {
+                    pageVariables.put("msg", "Error! Wrong password.");
+                    response.getWriter().println(PageGenerator.getPage("auth.tml", pageVariables));
+                } else {
+                    pageVariables.put("msg", "You're not registered!");
+                    response.getWriter().println(PageGenerator.getPage("auth.tml", pageVariables));
+                }
+                break;
+            default:
+                response.sendRedirect("/");
+                break;
         }
-
     }
 }

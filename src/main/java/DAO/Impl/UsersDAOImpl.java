@@ -5,17 +5,23 @@ import javax.swing.JOptionPane;
 
 import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import util.HibernateUtil;
 import dao.UsersDAO;
 import logic.UsersDataSet;
 
 public class UsersDAOImpl implements UsersDAO{
+    private SessionFactory sessionFactory;
+    public UsersDAOImpl(SessionFactory sessionFactory) {
+        this.sessionFactory = sessionFactory;
+    }
+
     public UsersDataSet getUserByLogin(String login) {
         Session session = null;
         UsersDataSet user = null;
         try {
-            session = HibernateUtil.getSessionFactory().openSession();
+            session = sessionFactory.openSession();
             Criteria criteria = session.createCriteria(UsersDataSet.class);
             user = (UsersDataSet) criteria.add(Restrictions.eq("login", login)).uniqueResult();
         } catch (Exception e) {
@@ -32,7 +38,7 @@ public class UsersDAOImpl implements UsersDAO{
     public void addUser(UsersDataSet dataSet) {
         Session session = null;
         try {
-            session = HibernateUtil.getSessionFactory().openSession();
+            session = sessionFactory.openSession();
             session.beginTransaction();
             session.save(dataSet);
             session.getTransaction().commit();
@@ -48,7 +54,7 @@ public class UsersDAOImpl implements UsersDAO{
     public void deleteUser(UsersDataSet dataSet) {
         Session session = null;
         try {
-            session = HibernateUtil.getSessionFactory().openSession();
+            session = sessionFactory.openSession();
             session.beginTransaction();
             session.delete(dataSet);
             session.getTransaction().commit();
