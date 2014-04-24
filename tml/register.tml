@@ -2,19 +2,17 @@
 <head>
     <title>Registration</title>
 </head>
-<body>
-    <h1>Registration</h1>
-    <#if msg == "You're successfully registered!">
-        <p>${msg}</p>
-        <p><a href="auth">Login</a></p>
-    <#else>
-        <form method="POST">
-            <p>Username: <input type="text" name="login"/></p>
-            <p>Password: <input type="text" name="password" /></p>
-            <input type="submit" value="REGISTER" />
-        </form>
-        <p>${msg}</p>
-    </#if>
 
+<body onload="checkRegistrationLoop()">
+    <h1>Registration</h1>
+    <p><a id="auth" href="auth" style="display: none">Login</a></p>
+    <form id="regForm" method="POST">
+        <p>Username: <input type="text" name="login"/></p>
+        <p>Password: <input type="text" name="password" /></p>
+        <input type="submit" value="REGISTER" />
+    </form>
+    <p id="message">${msg}</p>
 </body>
+<script type="text/javascript" src="js/jquery.js"></script>
+<script type="text/javascript" src="js/regHelper.js"></script>
 </html>

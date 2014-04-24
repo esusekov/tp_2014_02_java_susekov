@@ -3,16 +3,26 @@ package accountService;
 import dao.UsersDAO;
 import logic.UsersDataSet;
 import dao.Impl.UsersDAOImpl;
+import message.Abonent;
+import message.Address;
+import message.MessageSystem;
+import message.TimeHelper;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 
 
-public class AccountService {
+public class AccountService implements Abonent, Runnable{
+    private Address address;
+    private MessageSystem ms;
     private SessionFactory sessionFactory;
-    private static UsersDAO userDAO = null;
-    public AccountService() {
+
+    public AccountService(MessageSystem ms) {
+        this.ms = ms;
+        this.address = new Address();
+        ms.addService(this);
+        ms.getAddressService().setAccountService(address);
         try {
             Configuration configuration = new Configuration().addResource("hibernate.cfg.xml");
             configuration.configure();
@@ -23,27 +33,54 @@ public class AccountService {
             e.printStackTrace();
         }
     }
-    private UsersDAO getUserDAO() {
-        if (userDAO == null){
-            userDAO = new UsersDAOImpl(sessionFactory);
-        }
-        return userDAO;
+
+    public Address getAddress() {
+        return address;
     }
+
+    public MessageSystem getMessageSystem(){
+        return ms;
+    }
+
+    private UsersDAO getUserDAO() {
+        return new UsersDAOImpl(sessionFactory);
+    }
+
     public UsersDataSet getUserByLogin(String login) {
         return getUserDAO().getUserByLogin(login);
     }
+
+    public Long getUserId(String login) {
+        UsersDataSet user = getUserByLogin(login);
+        if (user != null)
+            return user.getId();
+        return null;
+    }
+
+    public boolean isRegistered(String login) {
+        return getUserByLogin(login) == null;
+    }
     public boolean addUser(UsersDataSet dataSet) {
-        if (getUserByLogin(dataSet.getLogin()) == null) {
+        TimeHelper.sleep(2000);
+        if (isRegistered(dataSet.getLogin())) {
             getUserDAO().addUser(dataSet);
             return true;
         }
         return false;
     }
+
     public boolean deleteUser(UsersDataSet dataSet) {
         if (getUserByLogin(dataSet.getLogin()) != null) {
             getUserDAO().deleteUser(dataSet);
             return true;
         }
         return false;
+    }
+
+    public void run(){
+        while(true){
+            ms.execForAbonent(this);
+            TimeHelper.sleep(10);
+        }
     }
 }

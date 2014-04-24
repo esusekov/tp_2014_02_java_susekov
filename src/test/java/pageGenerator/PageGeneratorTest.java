@@ -10,6 +10,6 @@ import templater.PageGenerator;
 public class PageGeneratorTest {
     @Test
     public void testGetAuthPage() throws Exception {
-        //
+        /*  */
     }
 }
