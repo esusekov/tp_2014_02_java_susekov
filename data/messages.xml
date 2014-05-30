@@ -1,0 +1,10 @@
+<class type="util.resources.Messages">
+    <authError>Auth error</authError>
+    <waitForAuth>wait for authorization</waitForAuth>
+    <waitForReg>Wait for registration.</waitForReg>
+    <emptyFieldsError>Error! Please, fill in all fields.</emptyFieldsError>
+    <successReg>You're successfully registered!</successReg>
+    <loginOccupied>Error! This login is occupied.</loginOccupied>
+    <notRegistered>You're not registered!</notRegistered>
+    <wrongPassword>Error! Wrong password.</wrongPassword>
+</class>

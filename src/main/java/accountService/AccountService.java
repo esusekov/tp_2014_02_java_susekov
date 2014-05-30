@@ -11,7 +11,8 @@ import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
-
+import util.resources.DBResource;
+import util.resources.ResourceFactory;
 
 public class AccountService implements Abonent, Runnable{
     private Address address;
@@ -24,7 +25,8 @@ public class AccountService implements Abonent, Runnable{
         ms.addService(this);
         ms.getAddressService().setAccountService(address);
         try {
-            Configuration configuration = new Configuration().addResource("hibernate.cfg.xml");
+            DBResource db = (DBResource) ResourceFactory.getInstance().get("data/database.xml");
+            Configuration configuration = new Configuration().addResource(db.getConfig());
             configuration.configure();
             StandardServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder().applySettings(
                     configuration.getProperties()).build();

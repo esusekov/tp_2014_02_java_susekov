@@ -9,12 +9,29 @@ import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import accountService.AccountService;
+import util.VFS.VFSImpl;
+import util.resources.Connection;
+import util.resources.ResourceFactory;
 
-
+import java.util.Iterator;
 
 
 public class Main {
     public static void main(String[] args) throws Exception {
+
+        VFSImpl vfs = new VFSImpl("");
+        Iterator<String> files = vfs.getIterator("data");
+        while (files.hasNext()){
+            String nextFile = files.next();
+            if (!vfs.isDirectory(nextFile)){
+                System.out.println(nextFile);
+                ResourceFactory.getInstance().addResource(
+                        nextFile,
+                        ResourceFactory.getInstance().getResource(vfs.getAbsolutePath(nextFile))
+                );
+            }
+        }
+
         MessageSystem ms = new MessageSystem();
 
         AccountService accountService = new AccountService(ms);
@@ -25,7 +42,8 @@ public class Main {
         (new Thread(accountService)).start();
         (new Thread(accountService2)).start();
 
-        Server server = new Server(8080);
+        Connection con = (Connection) ResourceFactory.getInstance().get("data/connection.xml");
+        Server server = new Server(con.getPort());
         ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
         context.addServlet(new ServletHolder(frontend), "/*");
 

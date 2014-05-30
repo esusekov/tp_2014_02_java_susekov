@@ -1,0 +1,5 @@
+<class type="util.resources.TmlResource">
+    <userid>userId.tml</userid>
+    <register>register.tml</register>
+    <auth>auth.tml</auth>
+</class>

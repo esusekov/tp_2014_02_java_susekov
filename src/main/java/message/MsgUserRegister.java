@@ -3,6 +3,8 @@ package message;
 
 import accountService.AccountService;
 import logic.UsersDataSet;
+import util.resources.Messages;
+import util.resources.ResourceFactory;
 
 public class MsgUserRegister extends MsgToAS {
     private String name;
@@ -18,11 +20,12 @@ public class MsgUserRegister extends MsgToAS {
 
     void exec(AccountService accountService) {
         UsersDataSet user = new UsersDataSet(name, password);
+        Messages messages = (Messages) ResourceFactory.getInstance().get("data/messages.xml");
         if (accountService.addUser(user)) {
-            String regStatus = "You're successfully registered!";
+            String regStatus = messages.getSuccessReg();
             accountService.getMessageSystem().sendMessage(new MsgUpdUserRegStatus(getTo(), getFrom(), sessionId, regStatus));
         } else {
-            String regStatus = "Error! This login is occupied.";
+            String regStatus = messages.getLoginOccupied();
             accountService.getMessageSystem().sendMessage(new MsgUpdUserRegStatus(getTo(), getFrom(), sessionId, regStatus));
         }
     }

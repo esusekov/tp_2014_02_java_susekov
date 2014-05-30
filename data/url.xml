@@ -1,0 +1,6 @@
+<class type="util.resources.URLResource">
+    <timer>/timer</timer>
+    <auth>/auth</auth>
+    <register>/register</register>
+    <registrating>/registrating</registrating>
+</class>

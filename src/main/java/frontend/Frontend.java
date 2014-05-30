@@ -14,9 +14,11 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
-import accountService.AccountService;
-import logic.UsersDataSet;
+
+import util.resources.Messages;
+import util.resources.ResourceFactory;
+import util.resources.TmlResource;
+import util.resources.URLResource;
 
 
 public class Frontend extends HttpServlet implements Abonent, Runnable {
@@ -66,40 +68,46 @@ public class Frontend extends HttpServlet implements Abonent, Runnable {
         String sessionId = request.getSession().getId();
         Map<String, Object> pageVariables = new HashMap<>();
         String path = request.getPathInfo();
-        switch (path) {
-            case "/timer":
-                HttpSession session = request.getSession();
-                UserSession userSession = sessionIdToUserSession.get(session.getId());
-                pageVariables.put("refreshPeriod", "1000");
-                pageVariables.put("serverTime", getTime());
-                if (userSession == null) {
-                    pageVariables.put("msg", "Auth error");
-                } else if (userSession.getStatus() != "") {
-                    pageVariables.put("msg", userSession.getStatus());
-                } else if (userSession.getUserId() == null) {
-                    pageVariables.put("msg", "wait for authorization");
-                } else pageVariables.put("msg", "name = " + userSession.getName() + ", id = " + userSession.getUserId());
-                response.getWriter().println(PageGenerator.getPage("userid.tml", pageVariables));
-                break;
-            case "/register":
-                pageVariables.put("msg", "");
-                response.getWriter().println(PageGenerator.getPage("register.tml", pageVariables));
-                break;
-            case "/registrating":
-                String status = sessionIdToUserRegStatus.get(sessionId);
-                if (status != null) {
-                    response.getWriter().println(status);
-                    sessionIdToUserRegStatus.remove(sessionId);
-                }
-                break;
-            case "/auth":
-                pageVariables.put("msg", "");
-                response.getWriter().println(PageGenerator.getPage("auth.tml", pageVariables));
-                break;
-            default:
-                response.sendRedirect("/");
-                break;
+
+        URLResource urlRes = (URLResource) ResourceFactory.getInstance().get("data/url.xml");
+        TmlResource tmlRes = (TmlResource) ResourceFactory.getInstance().get("data/templates.xml");
+        Messages messages = (Messages) ResourceFactory.getInstance().get("data/messages.xml");
+
+        if (path.equals(urlRes.getTimer())) {
+            HttpSession session = request.getSession();
+            UserSession userSession = sessionIdToUserSession.get(session.getId());
+            pageVariables.put("refreshPeriod", "1000");
+            pageVariables.put("serverTime", getTime());
+            if (userSession == null) {
+                pageVariables.put("msg", messages.getAuthError());
+            } else if (userSession.getStatus() != "") {
+                pageVariables.put("msg", userSession.getStatus());
+            } else if (userSession.getUserId() == null) {
+                pageVariables.put("msg", messages.getWaitForAuth());
+            } else pageVariables.put("msg", "name = " + userSession.getName() + ", id = " + userSession.getUserId());
+            response.getWriter().println(PageGenerator.getPage(tmlRes.getUserid(), pageVariables));
+            return;
         }
+        if (path.equals(urlRes.getRegister())) {
+            pageVariables.put("msg", "");
+            response.getWriter().println(PageGenerator.getPage(tmlRes.getRegister(), pageVariables));
+            return;
+        }
+        if (path.equals(urlRes.getRegistrating())) {
+            String status = sessionIdToUserRegStatus.get(sessionId);
+            if (status != null) {
+                response.getWriter().println(status);
+                sessionIdToUserRegStatus.remove(sessionId);
+            }
+            return;
+        }
+        if (path.equals(urlRes.getAuth())) {
+            pageVariables.put("msg", "");
+            response.getWriter().println(PageGenerator.getPage(tmlRes.getAuth(), pageVariables));
+            return;
+        }
+
+        response.sendRedirect("/");
 
     }
 
@@ -114,38 +122,41 @@ public class Frontend extends HttpServlet implements Abonent, Runnable {
         response.setStatus(HttpServletResponse.SC_OK);
         Map<String, Object> pageVariables = new HashMap<>();
         String path = request.getPathInfo();
-        switch (path) {
-            case "/register":
-                if (!(login.isEmpty()) && !(password.isEmpty())) {
-                    Address frontendAddress = getAddress();
-                    Address asAddress = ms.getAddressService().getAccountService();
-                    String sessionId = request.getSession().getId();
-                    ms.sendMessage(new MsgUserRegister(frontendAddress, asAddress, login, password, sessionId));
-                    pageVariables.put("msg", "Wait for registration.");
-                    response.getWriter().println(PageGenerator.getPage("register.tml", pageVariables));
-                } else {
-                    pageVariables.put("msg", "Error! Please, fill in all fields.");
-                    response.getWriter().println(PageGenerator.getPage("register.tml", pageVariables));
-                }
-                break;
-            case "/auth":
-                if (!(login.isEmpty()) && !(password.isEmpty())) {
-                    Address frontendAddress = getAddress();
-                    Address asAddress = ms.getAddressService().getAccountService();
-                    String sessionId = request.getSession().getId();
-                    UserSession userSession = new UserSession(sessionId, login, ms.getAddressService());
-                    sessionIdToUserSession.put(sessionId, userSession);
-                    ms.sendMessage(new MsgGetUserId(frontendAddress, asAddress, login, password, sessionId));
-                    response.sendRedirect("/timer");
-                } else {
-                    pageVariables.put("msg", "Error! Please, fill in all fields.");
-                    response.getWriter().println(PageGenerator.getPage("auth.tml", pageVariables));
-                }
-                break;
-            default:
-                response.sendRedirect("/");
-                break;
+
+        URLResource urlRes = (URLResource) ResourceFactory.getInstance().get("data/url.xml");
+        TmlResource tmlRes = (TmlResource) ResourceFactory.getInstance().get("data/templates.xml");
+        Messages messages = (Messages) ResourceFactory.getInstance().get("data/messages.xml");
+
+        if (path.equals(urlRes.getRegister())) {
+            if (!(login.isEmpty()) && !(password.isEmpty())) {
+                Address frontendAddress = getAddress();
+                Address asAddress = ms.getAddressService().getAccountService();
+                String sessionId = request.getSession().getId();
+                ms.sendMessage(new MsgUserRegister(frontendAddress, asAddress, login, password, sessionId));
+                pageVariables.put("msg", messages.getWaitForReg());
+            } else {
+                pageVariables.put("msg", messages.getEmptyFieldsError());
+            }
+            response.getWriter().println(PageGenerator.getPage(tmlRes.getRegister(), pageVariables));
+            return;
         }
+        if (path.equals(urlRes.getAuth())) {
+            if (!(login.isEmpty()) && !(password.isEmpty())) {
+                Address frontendAddress = getAddress();
+                Address asAddress = ms.getAddressService().getAccountService();
+                String sessionId = request.getSession().getId();
+                UserSession userSession = new UserSession(sessionId, login, ms.getAddressService());
+                sessionIdToUserSession.put(sessionId, userSession);
+                ms.sendMessage(new MsgGetUserId(frontendAddress, asAddress, login, password, sessionId));
+                response.sendRedirect(urlRes.getTimer());
+            } else {
+                pageVariables.put("msg", messages.getEmptyFieldsError());
+                response.getWriter().println(PageGenerator.getPage(tmlRes.getAuth(), pageVariables));
+            }
+            return;
+        }
+
+        response.sendRedirect("/");
     }
     public void run() {
         while (true) {

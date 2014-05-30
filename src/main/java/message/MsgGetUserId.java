@@ -2,6 +2,8 @@ package message;
 
 import accountService.AccountService;
 import logic.UsersDataSet;
+import util.resources.Messages;
+import util.resources.ResourceFactory;
 
 public class MsgGetUserId extends MsgToAS {
 	private String name;
@@ -17,14 +19,16 @@ public class MsgGetUserId extends MsgToAS {
 
 	void exec(AccountService accountService) {
 		UsersDataSet user = accountService.getUserByLogin(name);
+        Messages messages = (Messages) ResourceFactory.getInstance().get("data/messages.xml");
         if (user == null)
 		    accountService.getMessageSystem().sendMessage(new MsgUpdateUserId(getTo(),
-                    getFrom(), sessionId, null, "You're not registered!"));
+                    getFrom(), sessionId, null, messages.getNotRegistered()));
+            //вынести текст сообщений в ресурсы
         else if (password.equals(user.getPassword()))
             accountService.getMessageSystem().sendMessage(new MsgUpdateUserId(getTo(),
                     getFrom(), sessionId, user.getId(), ""));
         else
             accountService.getMessageSystem().sendMessage(new MsgUpdateUserId(getTo(),
-                    getFrom(), sessionId, null, "Error! Wrong password."));
+                    getFrom(), sessionId, null, messages.getWrongPassword()));
 	}
 }
